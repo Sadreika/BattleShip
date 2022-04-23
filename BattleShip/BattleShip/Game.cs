@@ -72,62 +72,32 @@ namespace BattleShip
 
         private bool? CheckShipPossition(Coordinate attackCoordinates)
         {
-            var rowCheckStartIndex = -1;
-            var columnCheckStartIndex = -1;
+            BoardIndex boardIndex = GetIndexes(attackCoordinates.Row, attackCoordinates.Column);
 
-            var rowCheckEndIndex = 1;
-            var columnCheckEndIndex = 1;
-
-            if (attackCoordinates.Row == 0)
+            for (int i = boardIndex.RowCheckStartIndex; i <= boardIndex.RowCheckEndIndex; i++)
             {
-                rowCheckStartIndex = 0;
-            }
-            else if (attackCoordinates.Row == 9)
-            {
-                rowCheckEndIndex = 0;
-            }
-
-            if (attackCoordinates.Column == 0)
-            {
-                columnCheckStartIndex = 0;
-            }
-            else if (attackCoordinates.Column == 9)
-            {
-                columnCheckEndIndex = 0;
-            }
-
-            for (int i = rowCheckStartIndex; i <= rowCheckEndIndex; i++)
-            {
-                for (int j = columnCheckStartIndex; j <= columnCheckEndIndex; j++)
+                for (int j = boardIndex.ColumnCheckStartIndex; j <= boardIndex.ColumnCheckEndIndex; j++)
                 {
+                    if (_player.PlayerBoard[attackCoordinates.Row + i][attackCoordinates.Column + j] != "X")
+                    {
+                        continue;
+                    }
+
                     if (i == -1 && j == 0)
                     {
-                        if (_player.PlayerBoard[attackCoordinates.Row + i][attackCoordinates.Column + j] == "X")
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                     if (i == 0 && j == -1)
                     {
-                        if (_player.PlayerBoard[attackCoordinates.Row + i][attackCoordinates.Column + j] == "X")
-                        {
-                            return false;
-                        }
-
+                        return false;
                     }
                     if (i == 0 && j == 1)
                     {
-                        if (_player.PlayerBoard[attackCoordinates.Row + i][attackCoordinates.Column + j] == "X")
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                     if (i == 1 && j == 0)
                     {
-                        if (_player.PlayerBoard[attackCoordinates.Row + i][attackCoordinates.Column + j] == "X")
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
             }
@@ -137,34 +107,11 @@ namespace BattleShip
 
         private bool CheckShipState(Coordinate attackCoordinates)
         {
-            //Starts from -1 because need to check left side
-            var rowCheckStartIndex = -1;
-            var columnCheckStartIndex = -1;
+            BoardIndex boardIndex = GetIndexes(attackCoordinates.Row, attackCoordinates.Column);
 
-            var rowCheckEndIndex = 1;
-            var columnCheckEndIndex = 1;
-
-            if (attackCoordinates.Row == 0)
+            for (int i = boardIndex.RowCheckStartIndex; i <= boardIndex.RowCheckEndIndex; i++)
             {
-                rowCheckStartIndex = 0;
-            }
-            else if (attackCoordinates.Row == 9)
-            {
-                rowCheckEndIndex = 0;
-            }
-
-            if (attackCoordinates.Column == 0)
-            {
-                columnCheckStartIndex = 0;
-            }
-            else if (attackCoordinates.Column == 9)
-            {
-                columnCheckEndIndex = 0;
-            }
-
-            for (int i = rowCheckStartIndex; i <= rowCheckEndIndex; i++)
-            {
-                for (int j = columnCheckStartIndex; j <= columnCheckEndIndex; j++)
+                for (int j = boardIndex.ColumnCheckStartIndex; j <= boardIndex.ColumnCheckEndIndex; j++)
                 {
                     if (_player.PlayerBoard[attackCoordinates.Row + i][attackCoordinates.Column + j] == "O")
                     {
@@ -178,66 +125,34 @@ namespace BattleShip
 
         private Coordinate PlanCoordinates(Coordinate successfulAttackCoordinates, bool? verticalAttackedShip)
         {
-            var rowCheckStartIndex = -1;
-            var columnCheckStartIndex = -1;
+            BoardIndex boardIndex = GetIndexes(successfulAttackCoordinates.Row, successfulAttackCoordinates.Column);
 
-            var rowCheckEndIndex = 1;
-            var columnCheckEndIndex = 1;
-
-            if (successfulAttackCoordinates.Row == 0)
+            for (int i = boardIndex.RowCheckStartIndex; i <= boardIndex.RowCheckEndIndex; i++)
             {
-                rowCheckStartIndex = 0;
-            }
-            else if (successfulAttackCoordinates.Row == 9)
-            {
-                rowCheckEndIndex = 0;
-            }
-
-            if (successfulAttackCoordinates.Column == 0)
-            {
-                columnCheckStartIndex = 0;
-            }
-            else if (successfulAttackCoordinates.Column == 9)
-            {
-                columnCheckEndIndex = 0;
-            }
-
-            for (int i = rowCheckStartIndex; i <= rowCheckEndIndex; i++)
-            {
-                for (int j = columnCheckStartIndex; j <= columnCheckEndIndex; j++)
+                for (int j = boardIndex.ColumnCheckStartIndex; j <= boardIndex.ColumnCheckEndIndex; j++)
                 {
+                    var boardCell = _player.PlayerBoard[successfulAttackCoordinates.Row + i][successfulAttackCoordinates.Column + j];
+
+                    if (!string.IsNullOrWhiteSpace(boardCell) && boardCell != "O")
+                    {
+                        continue;
+                    }
+
                     if ((verticalAttackedShip == true || verticalAttackedShip == null) && i == -1 && j == 0)
                     {
-                        if (string.IsNullOrWhiteSpace(_player.PlayerBoard[successfulAttackCoordinates.Row + i][successfulAttackCoordinates.Column + j]) ||
-                            _player.PlayerBoard[successfulAttackCoordinates.Row + i][successfulAttackCoordinates.Column + j] == "O")
-                        {
-                            return new Coordinate() { Row = successfulAttackCoordinates.Row + i, Column = successfulAttackCoordinates.Column + j };
-                        }
+                        return new Coordinate() { Row = successfulAttackCoordinates.Row + i, Column = successfulAttackCoordinates.Column + j };
                     }
                     if ((verticalAttackedShip == false || verticalAttackedShip == null) && i == 0 && j == -1)
                     {
-                        if (string.IsNullOrWhiteSpace(_player.PlayerBoard[successfulAttackCoordinates.Row + i][successfulAttackCoordinates.Column + j]) ||
-                            _player.PlayerBoard[successfulAttackCoordinates.Row + i][successfulAttackCoordinates.Column + j] == "O")
-                        {
-                            return new Coordinate() { Row = successfulAttackCoordinates.Row + i, Column = successfulAttackCoordinates.Column + j };
-                        }
-
+                        return new Coordinate() { Row = successfulAttackCoordinates.Row + i, Column = successfulAttackCoordinates.Column + j };
                     }
                     if ((verticalAttackedShip == false || verticalAttackedShip == null) && i == 0 && j == 1)
                     {
-                        if (string.IsNullOrWhiteSpace(_player.PlayerBoard[successfulAttackCoordinates.Row + i][successfulAttackCoordinates.Column + j]) ||
-                            _player.PlayerBoard[successfulAttackCoordinates.Row + i][successfulAttackCoordinates.Column + j] == "O")
-                        {
-                            return new Coordinate() { Row = successfulAttackCoordinates.Row + i, Column = successfulAttackCoordinates.Column + j };
-                        }
+                        return new Coordinate() { Row = successfulAttackCoordinates.Row + i, Column = successfulAttackCoordinates.Column + j };
                     }
                     if ((verticalAttackedShip == true || verticalAttackedShip == null) && i == 1 && j == 0)
                     {
-                        if (string.IsNullOrWhiteSpace(_player.PlayerBoard[successfulAttackCoordinates.Row + i][successfulAttackCoordinates.Column + j]) ||
-                            _player.PlayerBoard[successfulAttackCoordinates.Row + i][successfulAttackCoordinates.Column + j] == "O")
-                        {
-                            return new Coordinate() { Row = successfulAttackCoordinates.Row + i, Column = successfulAttackCoordinates.Column + j };
-                        }
+                        return new Coordinate() { Row = successfulAttackCoordinates.Row + i, Column = successfulAttackCoordinates.Column + j };
                     }
                 }
             }
@@ -268,8 +183,14 @@ namespace BattleShip
                     attackCoordinates.Row = random.Next(0, 10);
                     attackCoordinates.Column = random.Next(0, 10);
 
-                    if (string.IsNullOrWhiteSpace(_player.PlayerBoard[attackCoordinates.Row][attackCoordinates.Column]) || _player.PlayerBoard[attackCoordinates.Row][attackCoordinates.Column] == "O")
+                    var boardCell = _player.PlayerBoard[attackCoordinates.Row][attackCoordinates.Column];
+        
+                    if (string.IsNullOrWhiteSpace(boardCell) || boardCell == "O")
                     {
+                        if (boardCell == "*")
+                        {
+                            var a = 1;
+                        }
                         break;
                     }
                 }
@@ -283,9 +204,7 @@ namespace BattleShip
             return AttackShip(_player.PlayerBoard, _opponent.OpponentBoard, attackCoordinates);
         }
 
-        private bool AttackShip(List<List<string>> boardToAttack,
-            List<List<string>> boardToMarkAttacks,
-            Coordinate attackCoordinates)
+        private bool AttackShip(List<List<string>> boardToAttack, List<List<string>> boardToMarkAttacks, Coordinate attackCoordinates)
         {
             var attackedCell = boardToAttack[attackCoordinates.Row][attackCoordinates.Column];
 
@@ -321,16 +240,14 @@ namespace BattleShip
                     var available = CheckAvailability(
                              _player.PlayerBoard,
                              shipPlacementInfoArray[0].ToUpper() == "V" ? true : false,
-                             int.Parse(shipPlacementInfoArray[1]) - 1, // -1 because user imput starts from 1 not from 0
+                             int.Parse(shipPlacementInfoArray[1]) - 1,
                              int.Parse(shipPlacementInfoArray[2]) - 1,
                              ship.Size,
                              out List<Coordinate> coordinates);
 
                     if (available)
                     {
-                        PlaceShip(
-                            _player.PlayerBoard,
-                            coordinates);
+                        PlaceShip(_player.PlayerBoard, coordinates);
                         break;
                     }
                     else
@@ -356,32 +273,18 @@ namespace BattleShip
                     int rowToStart = random.Next(0, 10);
                     int columnToStart = random.Next(0, 10);
 
-                    var available = CheckAvailability(
-                        _opponent.PlayerBoard,
-                        vertical,
-                        rowToStart,
-                        columnToStart,
-                        ship.Size,
-                        out List<Coordinate> coordinates);
+                    var available = CheckAvailability(_opponent.PlayerBoard, vertical, rowToStart, columnToStart, ship.Size, out List<Coordinate> coordinates);
 
                     if (available)
                     {
-                        PlaceShip(
-                            _opponent.PlayerBoard,
-                            coordinates);
+                        PlaceShip(_opponent.PlayerBoard, coordinates);
                         break;
                     }
                 }
             }
         }
 
-        private bool CheckAvailability(
-            List<List<string>> board,
-            bool vertical,
-            int rowToStart,
-            int columnToStart,
-            int size,
-            out List<Coordinate> coordinates)
+        private bool CheckAvailability(List<List<string>> board, bool vertical, int rowToStart, int columnToStart, int size, out List<Coordinate> coordinates)
         {
             coordinates = new List<Coordinate>();
             for (int i = 0; i < size; i++)
@@ -394,11 +297,7 @@ namespace BattleShip
                     return false;
                 }
 
-                coordinates.Add(new Coordinate()
-                {
-                    Row = row,
-                    Column = column
-                });
+                coordinates.Add(new Coordinate() { Row = row, Column = column });
             }
 
             return true;
@@ -406,40 +305,16 @@ namespace BattleShip
 
         private bool ShipPlacementValidation(List<List<string>> board, int row, int column)
         {
-            //Check that ship would not be placed outside the board
             if (row >= 10 || column >= 10)
             {
                 return false;
             }
 
-            //Starts from -1 because need to check left side
-            var rowCheckStartIndex = -1;
-            var columnCheckStartIndex = -1;
+            BoardIndex boardIndex = GetIndexes(row, column);
 
-            var rowCheckEndIndex = 1;
-            var columnCheckEndIndex = 1;
-
-            if (row == 0)
+            for (int i = boardIndex.RowCheckStartIndex; i <= boardIndex.RowCheckEndIndex; i++)
             {
-                rowCheckStartIndex = 0;
-            }
-            else if (row == 9)
-            {
-                rowCheckEndIndex = 0;
-            }
-
-            if (column == 0)
-            {
-                columnCheckStartIndex = 0;
-            }
-            else if (column == 9)
-            {
-                columnCheckEndIndex = 0;
-            }
-
-            for (int i = rowCheckStartIndex; i <= rowCheckEndIndex; i++)
-            {
-                for (int j = columnCheckStartIndex; j <= columnCheckEndIndex; j++)
+                for (int j = boardIndex.ColumnCheckStartIndex; j <= boardIndex.ColumnCheckEndIndex; j++)
                 {
                     if (!string.IsNullOrWhiteSpace(board[row + i][column + j]))
                     {
@@ -449,6 +324,31 @@ namespace BattleShip
             }
 
             return true;
+        }
+
+        private BoardIndex GetIndexes(int row, int column)
+        {
+            BoardIndex boardIndex = new BoardIndex();
+
+            if (row == 0)
+            {
+                boardIndex.RowCheckStartIndex = 0;
+            }
+            else if (row == 9)
+            {
+                boardIndex.RowCheckEndIndex = 0;
+            }
+
+            if (column == 0)
+            {
+                boardIndex.ColumnCheckStartIndex = 0;
+            }
+            else if (column == 9)
+            {
+                boardIndex.ColumnCheckEndIndex = 0;
+            }
+
+            return boardIndex;
         }
 
         private void PlaceShip(List<List<string>> board, List<Coordinate> coordinates)
