@@ -6,7 +6,7 @@ namespace BattleShip
 {
     public class Ship
     {
-        int Size { get; set; }
-        List<Coordinate> Coordinates { get; set; }
+        public int Size { get; set; }
+        public List<Coordinate> Coordinates { get; set; }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace BattleShip
 {
@@ -24,6 +23,22 @@ namespace BattleShip
         public static void ExitGame()
         {
             Console.WriteLine("Game over");
+        }
+
+        public static void DisplayBoard(List<List<string>> playerBoard)
+        {
+            string board = string.Empty;
+            foreach(var row in playerBoard)
+            {
+                foreach(var cell in row)
+                {
+                    board += $"|{cell}|";
+                }
+
+                board += "\n";
+            }
+
+            Console.WriteLine(board);
         }
     }
 }
