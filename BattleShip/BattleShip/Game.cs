@@ -123,6 +123,24 @@ namespace BattleShip
             return false;
         }
 
+        private bool CheckForNearShips(Coordinate attackCoordinates)
+        {
+            BoardIndex boardIndex = GetIndexes(attackCoordinates.Row, attackCoordinates.Column);
+
+            for (int i = boardIndex.RowCheckStartIndex; i <= boardIndex.RowCheckEndIndex; i++)
+            {
+                for (int j = boardIndex.ColumnCheckStartIndex; j <= boardIndex.ColumnCheckEndIndex; j++)
+                {
+                    if (_player.PlayerBoard[attackCoordinates.Row + i][attackCoordinates.Column + j] == "X")
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
         private Coordinate PlanCoordinates(Coordinate successfulAttackCoordinates, bool? verticalAttackedShip)
         {
             BoardIndex boardIndex = GetIndexes(successfulAttackCoordinates.Row, successfulAttackCoordinates.Column);
@@ -185,12 +203,8 @@ namespace BattleShip
 
                     var boardCell = _player.PlayerBoard[attackCoordinates.Row][attackCoordinates.Column];
         
-                    if (string.IsNullOrWhiteSpace(boardCell) || boardCell == "O")
+                    if ((string.IsNullOrWhiteSpace(boardCell) || boardCell == "O") && CheckForNearShips(attackCoordinates))
                     {
-                        if (boardCell == "*")
-                        {
-                            var a = 1;
-                        }
                         break;
                     }
                 }
