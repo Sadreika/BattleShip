@@ -22,18 +22,116 @@ namespace BattleShip
             _opponent = new Player();
 
             PrepareGame();
+            StartBattle();
+        }
+
+        private void StartBattle()
+        {
+            while (true)
+            {
+                bool successfulAttack;
+                do
+                {
+                    Console.Clear();
+                    Dialogs.DisplayBoard(_player.PlayerBoard);
+                    Dialogs.DisplayBoard(_player.OpponentBoard);
+                    successfulAttack = PlayerAttack();
+                }
+                while (successfulAttack);
+
+                do
+                {
+                    successfulAttack = OpponentAttack();
+                }
+                while (successfulAttack);
+            }
+        }
+
+        private bool PlayerAttack()
+        {
+            bool attackCoordinatesCollected;
+            Coordinate attackCoordinates = new Coordinate();
+            do
+            {
+                attackCoordinatesCollected = Dialogs.BattleDialog(ref attackCoordinates);
+            }
+            while (!attackCoordinatesCollected);
+            return AttackShip(_opponent.PlayerBoard, _player.OpponentBoard, attackCoordinates);
+        }
+
+        private bool OpponentAttack()
+        {
+            var random = new Random();
+
+            Coordinate attackCoordinates = new Coordinate()
+            {
+                Row = random.Next(0, 10),
+                Column = random.Next(0, 10)
+            };
+
+            return AttackShip(_player.PlayerBoard, _opponent.OpponentBoard, attackCoordinates);
+        }
+
+        private bool AttackShip(List<List<string>> boardToAttack,
+            List<List<string>> boardToMarkAttacks,
+            Coordinate attackCoordinates)
+        {
+            var attackedCell = boardToAttack[attackCoordinates.Row][attackCoordinates.Column];
+
+            boardToMarkAttacks[attackCoordinates.Row][attackCoordinates.Column] = attackedCell == "O" ? "X" : "*";
+            boardToAttack[attackCoordinates.Row][attackCoordinates.Column] = attackedCell == "O" ? "X" : "*";
+
+            return attackedCell == "O";
         }
 
         private void PrepareGame()
         {
             PreparePlayerShips();
             PrepareOpponentShips();
-            Dialogs.DisplayBoard(_opponent.PlayerBoard);
+            Console.Clear();
         }
 
         private void PreparePlayerShips()
         {
-            //throw new NotImplementedException();
+            Dialogs.DisplayBoard(_player.PlayerBoard);
+            foreach (var ship in _player.PlayerShips)
+            {
+                do
+                {
+                    var shipPlacementInfoCollected = false;
+                    var shipPlacementInfo = string.Empty;
+                    while (!shipPlacementInfoCollected)
+                    {
+                        shipPlacementInfoCollected = Dialogs.PlaceShip(ref shipPlacementInfo);
+                    }
+
+                    var shipPlacementInfoArray = shipPlacementInfo.Split(",");
+
+                    var available = CheckAvailability(
+                             _player.PlayerBoard,
+                             shipPlacementInfoArray[0].ToUpper() == "V" ? true : false,
+                             int.Parse(shipPlacementInfoArray[1]) - 1, // -1 because user imput starts from 1 not from 0
+                             int.Parse(shipPlacementInfoArray[2]) - 1,
+                             ship.Size,
+                             out List<Coordinate> coordinates);
+
+                    if (available)
+                    {
+                        PlaceShip(
+                            _player.PlayerBoard,
+                            coordinates);
+                        break;
+                    }
+                    else
+                    {
+                        Console.WriteLine("You can not place ship here");
+                    }
+                }
+                while (true);
+
+                Console.Clear();
+                Dialogs.DisplayBoard(_player.PlayerBoard);
+            }
         }
 
         private void PrepareOpponentShips()
@@ -77,8 +175,8 @@ namespace BattleShip
             coordinates = new List<Coordinate>();
             for (int i = 0; i < size; i++)
             {
-                int row = rowToStart + (vertical ? 0 : i);
-                int column = columnToStart + (vertical ? i : 0);
+                int row = rowToStart + (vertical ? i : 0);
+                int column = columnToStart + (vertical ? 0 : i);
 
                 if (!ShipPlacementValidation(board, row, column))
                 {
