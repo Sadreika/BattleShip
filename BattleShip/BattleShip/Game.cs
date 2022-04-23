@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BattleShip
 {
@@ -38,10 +39,18 @@ namespace BattleShip
                 bool successfulAttack;
                 do
                 {
-                    Console.Clear();
-                    Dialogs.DisplayBoard(_player.PlayerBoard);
-                    Dialogs.DisplayBoard(_player.OpponentBoard);
+                    Dialogs.DisplayAllPlayerBoards(_player);
                     successfulAttack = PlayerAttack();
+
+                    if (successfulAttack)
+                    {
+                        UpdateShipsState(_opponent.PlayerBoard, _opponent.PlayerShips);
+                        if (CheckForGameEnd(_opponent.PlayerShips))
+                        {
+                            Dialogs.DisplayAllPlayerBoards(_player);
+                            return;
+                        }
+                    }
                 }
                 while (successfulAttack);
 
@@ -59,6 +68,12 @@ namespace BattleShip
                         successfulAttackCoordinates = attackCoordinates;
                         shipLocated = CheckShipState(attackCoordinates);
                         verticalAttackedShip = CheckShipPossition(attackCoordinates);
+                        UpdateShipsState(_player.PlayerBoard, _player.PlayerShips);
+                        if (CheckForGameEnd(_player.PlayerShips))
+                        {
+                            Dialogs.DisplayAllPlayerBoards(_player);
+                            return;
+                        }
 
                         if (!shipLocated)
                         {
@@ -67,6 +82,31 @@ namespace BattleShip
                     }
                 }
                 while (successfulAttack);
+            }
+        }
+
+        private bool CheckForGameEnd(List<Ship> playerShips)
+        {
+            return !playerShips.Any(x => x.Alive == true);
+        }
+
+        private void UpdateShipsState(List<List<string>> board, List<Ship> playerShips)
+        {
+            foreach (var ship in playerShips)
+            {
+                int damagedPartsCount = 0;
+                foreach (var coordinates in ship.Coordinates)
+                {
+                    if (board[coordinates.Row][coordinates.Column] == "X")
+                    {
+                        damagedPartsCount++;
+                    }
+
+                    if (damagedPartsCount == ship.Size)
+                    {
+                        ship.Alive = false;
+                    }
+                }
             }
         }
 
@@ -202,8 +242,13 @@ namespace BattleShip
                     attackCoordinates.Column = random.Next(0, 10);
 
                     var boardCell = _player.PlayerBoard[attackCoordinates.Row][attackCoordinates.Column];
-        
-                    if ((string.IsNullOrWhiteSpace(boardCell) || boardCell == "O") && CheckForNearShips(attackCoordinates))
+
+                    if (string.IsNullOrWhiteSpace(boardCell) && CheckForNearShips(attackCoordinates))
+                    {
+                        break;
+                    }
+
+                    if (boardCell == "O")
                     {
                         break;
                     }
@@ -261,7 +306,7 @@ namespace BattleShip
 
                     if (available)
                     {
-                        PlaceShip(_player.PlayerBoard, coordinates);
+                        PlaceShip(_player.PlayerBoard, ship, coordinates);
                         break;
                     }
                     else
@@ -291,7 +336,7 @@ namespace BattleShip
 
                     if (available)
                     {
-                        PlaceShip(_opponent.PlayerBoard, coordinates);
+                        PlaceShip(_opponent.PlayerBoard, ship, coordinates);
                         break;
                     }
                 }
@@ -365,8 +410,11 @@ namespace BattleShip
             return boardIndex;
         }
 
-        private void PlaceShip(List<List<string>> board, List<Coordinate> coordinates)
+        private void PlaceShip(List<List<string>> board, Ship ship, List<Coordinate> coordinates)
         {
+            ship.Coordinates = new List<Coordinate>();
+            ship.Coordinates.AddRange(coordinates);
+
             foreach (var coordinate in coordinates)
             {
                 board[coordinate.Row][coordinate.Column] = "O";

@@ -43,6 +43,13 @@ namespace BattleShip
             Console.WriteLine(board);
         }
 
+        internal static void DisplayAllPlayerBoards(Player player)
+        {
+            Console.Clear();
+            Dialogs.DisplayBoard(player.PlayerBoard);
+            Dialogs.DisplayBoard(player.OpponentBoard);
+        }
+
         public static bool BattleDialog(ref Coordinate attackCoordinates)
         {
             Console.WriteLine("Attack opponent, enter coordinates");
